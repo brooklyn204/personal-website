@@ -1,24 +1,24 @@
 :root {
-  --main: #778DA9;
-  --background: #415A77;
-  --accent: #1B263B;
-  --bright_accent: #E0E1DD;
-  --text: #0D1B2A;
+  --main: #748D92;
+  --background: #2E3944;
+  --accent: #124E66;
+  --bright_accent: #D3D9D4;
+  --text: #212A31;
 }
 
 body { 
   color: var(--text);
+  background-color: var(--background);
 }
 
 h1 {
-  font-size: 70px !important;
+  font-size: 60px !important;
   line-height: 0px !important;
 }
 
 ul {
   list-style-type: "-  ";
 }
-
 
 #root {
   display: flex;
@@ -27,6 +27,10 @@ ul {
   width: 100%;
   margin: 0px auto;
   padding: 20px;
+  /* Background -- maybe use later
+  background-image:url("./assets/water.jpg");
+  background-attachment: fixed;
+  background-size:cover;*/
 }
 
 .block {
@@ -35,13 +39,23 @@ ul {
   justify-content: center;
   align-items:center;
   width: 60%;
-  border: red 2px solid;
   border-radius: 10px;
   margin:20px;
+  background-color: var(--main);
+  filter: drop-shadow(0 0 10px var(--text));
+  padding:10px
 }
 
 .one {
   height:450px;
+}
+
+.two {
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  height:100%;
+  width:100%
 }
 
 .left, .right {
@@ -52,8 +66,8 @@ ul {
 }
 
 .center {
-  border-left: var(--accent) 2px solid;
-  height:100%;
+  border-left: var(--bright_accent) 2px solid;
+  height:90%;
   left:50%;
   width:20px;
   margin-left:20px;
@@ -74,15 +88,6 @@ ul {
   justify-content: center;
 }
 
-.profile_pic {
-  height: 200px;
-  padding: 10px;
-  will-change: filter;
-  transition: filter 300ms;
-  border: 0px;
-  border-radius: 20%;
-}
-
 .connection {
   padding: 10px;
   margin: 5px;
@@ -92,6 +97,58 @@ ul {
   flex-direction:row;
   justify-content: flex-start;
   align-items: center;
+  background-color: var(--bright_accent);
+}
+
+.connection h3, .repo h3 {
+  color: var(--text);
+  margin:0px;
+}
+
+.scroll {
+  display:flex;
+  flex-direction:row;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: scroll;
+  padding:5px
+}
+
+.repo {
+  width:200px;
+  padding: 10px;
+  margin: 5px;
+  border: var(--accent) 2px solid;
+  border-radius: 10px;
+  background-color: var(--bright_accent);
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex-shrink: 0;
+}
+
+.info {
+  color: var(--main);
+  font-size:small;
+}
+
+.connection:hover {
+  filter: drop-shadow(0 0 10px var(--accent));
+  border: var(--accent) 2px solid;
+}
+
+.icon {
+  width:25px; /* Must be >= 21 px, as per LinkedIn policy: https://brand.linkedin.com/content/brand/global/en_us/index/visual-identity/logo */
+  margin-right: 10px;
+}
+
+.profile_pic {
+  height: 200px;
+  margin: 10px;
+  will-change: filter;
+  transition: filter 300ms;
+  border: var(--accent) 2px solid;
+  border-radius: 20%;
 }
 
 .profile_pic:hover {
