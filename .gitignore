@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 *.cjs
+
+# Secrets
+./src/assets/secrets.json

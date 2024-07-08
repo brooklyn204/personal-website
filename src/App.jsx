@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { useEffect } from 'react'
+import { Octokit } from "https://esm.sh/@octokit/core"
 import profile from './assets/profile.jpg'
 import githubIcon from './assets/github-logo.png'
 import linkedinIcon from './assets/linkedin-logo.png'
 import resumeIcon from './assets/resume-logo.png'
 import goodreadsIcon from './assets/goodreads-logo.png'
 import stravaIcon from './assets/strava-logo.png'
+import secrets from './assets/secrets.json'
 import './App.css'
 
-function repoCard(name, modified, collaborators, url) {
+function repoCard(name, date, collaborators, url) {
   this.name = name;
-  this.modified = modified;
+  this.date = date;
   this.collaborators = collaborators;
   this.url = url;
 }
@@ -19,21 +21,67 @@ function App() {
   const [count, setCount] = useState(0);
 
   const [repos, setRepos] = useState([]);
+
+  // Object for use with getting from github API
+  const octokit = new Octokit({
+    auth: secrets.github_auth_token
+  });
+  // Async function to get collaborator data for given repo and build card from it and other repo data
+  const getcard = async (repo) => {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/collaborators', {
+        owner: 'brooklyn204',
+        repo: repo.name,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28',
+          'User-Agent': 'brooklyn204'
+        }
+      });
+      
+      const data = await response.data;
+      let collaborators = [];
+      console.log("length:" + data.length)
+      for (let i = 0; i < data.length; i++) {
+        collaborators.push(data[i].avatar_url);
+      }
+      console.log("collabs: "+collaborators)
+      let card = new repoCard(repo.name,repo.created_at,collaborators,repo.html_url);
+      return card;
+  }
   useEffect(() => {
-    fetch("https://api.github.com/users/brooklyn204/repos", {
-      "headers": {
+    // Async function to fetch data from github api and build cards from it
+    const getCardData = async () => {
+      // Get data from API
+      const response = await octokit.request('GET /users/{username}/repos', {
+        username: 'brooklyn204',
+        headers: {
           'X-GitHub-Api-Version': '2022-11-28'
-      },
-      "method": "GET"
-    }).then(response => response.json())
-    .then(repos => {
-      console.log(repos);
+        }
+      });
+      console.log("should do this AFTER repos request completed");
+      // If request completed successfully, build and set cards, otherwise return empty list
       var cards = [];
-      for (var i in repos) {
-        let card = new repoCard(repos[i].name,repos[i].updated_at,null,repos[i].html_url);
-        cards.push(card);
-      } 
-      setRepos(cards)});
+      if (response.status == 200) {
+        let repositories = await response.data;
+        console.log("good status, got repositories "+repositories);
+        for (let r=0; r < repositories.length; r++) {
+          let card = await getcard(repositories[r]);
+          console.log("this is for card "+repositories[r].name+". Got this card: "+card);
+          cards.push(card);
+        }
+        console.log("done with pushing cards");
+      } else {
+        console.log("bad status");
+      }
+      console.log(cards);
+      cards.sort(function(card1, card2) {
+        return card1.date < card2.date;
+    });
+      setRepos(cards);
+    };
+    // Call async function
+    console.log("before calling async");
+    getCardData();
+    console.log("after calling async");
    }, []);
 
   return (
@@ -94,8 +142,14 @@ function App() {
             return (
               <a className="repo" href={card.url}>
                 <h3>{card.name}</h3>
-                <br/>
-                <p className="info">{card.modified}</p>
+                <div className="repo_meta">
+                  <p className="repo_date">{card.date}</p>
+                  {card.collaborators.map(collaborator => {
+                    return (
+                    <img className="githubPP" src={collaborator}/>
+                  )
+                  })}
+                </div>
               </a>)
           })}
         </div>
