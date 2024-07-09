@@ -22,12 +22,12 @@ function App() {
 
   const [repos, setRepos] = useState([]);
 
-  // Object for use with getting from github API
+  // Object for use with getting from GitHub API
   const octokit = new Octokit({
     auth: secrets.github_auth_token
   });
-  // Async function to get collaborator data for given repo and build card from it and other repo data
-  const getcard = async (repo) => {
+  // Async function to get a list of collaborators for given GitHub repo, using GitHub API
+  const getcollabs = async (repo) => {
     const response = await octokit.request('GET /repos/{owner}/{repo}/collaborators', {
         owner: 'brooklyn204',
         repo: repo.name,
@@ -39,14 +39,12 @@ function App() {
       
       const data = await response.data;
       let collaborators = [];
-      console.log("length:" + data.length)
       for (let i = 0; i < data.length; i++) {
         collaborators.push(data[i].avatar_url);
       }
-      console.log("collabs: "+collaborators)
-      let card = new repoCard(repo.name,repo.created_at,collaborators,repo.html_url);
-      return card;
+      return collaborators;
   }
+
   useEffect(() => {
     // Async function to fetch data from github api and build cards from it
     const getCardData = async () => {
@@ -57,31 +55,29 @@ function App() {
           'X-GitHub-Api-Version': '2022-11-28'
         }
       });
-      console.log("should do this AFTER repos request completed");
+
       // If request completed successfully, build and set cards, otherwise return empty list
       var cards = [];
       if (response.status == 200) {
         let repositories = await response.data;
-        console.log("good status, got repositories "+repositories);
         for (let r=0; r < repositories.length; r++) {
-          let card = await getcard(repositories[r]);
-          console.log("this is for card "+repositories[r].name+". Got this card: "+card);
+          let collabs = await getcollabs(repositories[r]);
+          let card = new repoCard(repositories[r].name,repositories[r].created_at,collabs,repositories[r].html_url);
           cards.push(card);
         }
-        console.log("done with pushing cards");
       } else {
-        console.log("bad status");
+        console.log("Github API returned "+response.status);
       }
+
       console.log(cards);
+      // Sort cards by descending date (put most recent first)
       cards.sort(function(card1, card2) {
         return card1.date < card2.date;
     });
       setRepos(cards);
     };
-    // Call async function
-    console.log("before calling async");
+    // Call async function defined above
     getCardData();
-    console.log("after calling async");
    }, []);
 
   return (
